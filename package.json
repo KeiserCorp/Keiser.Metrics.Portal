@@ -1,0 +1,13 @@
+{
+  "name": "keiser.metrics.portal",
+  "version": "1.0.0",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Keiser Corp.",
+  "devDependencies": {
+    "electron": "~1.6.2"
+  }
+}
