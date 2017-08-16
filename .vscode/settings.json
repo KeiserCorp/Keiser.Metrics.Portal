@@ -1,0 +1,39 @@
+{
+  "beautify.language": {
+    "css": [
+      "css",
+      "scss"
+    ],
+    "js": [],
+    "html": []
+  },
+  "beautify.config": {
+    "indent_char": " ",
+    "indent_size": 2,
+    "newline_between_rules": true
+  },
+  "css.validate": false,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "editor.formatOnType": true,
+  "editor.formatOnPaste": false,
+  "editor.formatOnSave": true,
+  "search.exclude": {
+    "**/node_modules": true
+  },
+  "standard.autoFixOnSave": true,
+  "standard.validate": [
+    "javascript",
+    {
+      "language": "html",
+      "autoFix": true
+    }
+  ],
+  "standard.options": {
+    "plugins": [
+      "html"
+    ]
+  },
+  "javascript.format.enable": false
+}

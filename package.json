@@ -4,10 +4,13 @@
   "private": true,
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "dev": "electron --remote-debugging-port=9222 ."
   },
   "author": "Keiser Corp.",
   "devDependencies": {
-    "electron": "~1.6.2"
+    "electron": "~1.6.2",
+    "eslint-plugin-html": "^3.2.0",
+    "standard": "^10.0.3"
   }
 }
