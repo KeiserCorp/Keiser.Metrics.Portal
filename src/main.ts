@@ -1,5 +1,8 @@
 import { app } from 'electron'
+import { WebView } from './metricsWindow'
+
+let wv: WebView
 
 app.on('ready', () => {
-  console.log('Ready')
+  wv = new WebView('https://metrics.keiser.com/app', 'Metrics')
 })
