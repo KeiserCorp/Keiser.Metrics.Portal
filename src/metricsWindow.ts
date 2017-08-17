@@ -12,7 +12,7 @@ export class WebView {
 
     this.window.maximize()
     this.window.loadURL(route)
-    this.window.once('ready-to-show', () => { this.window.show() })
+    this.window.once('ready-to-show', this.window.show)
   }
 
 }
