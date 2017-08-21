@@ -25,6 +25,7 @@
     "webpack": "^3.5.5"
   },
   "dependencies": {
+    "crc": "^3.4.4",
     "electron": "^1.7.6"
   }
 }
