@@ -28,6 +28,7 @@ const commonConfig = {
       },
       {
         test: /\.js$/,
+        exclude: /node_modules/,
         enforce: 'pre',
         loader: 'standard-loader',
         options: {
@@ -38,6 +39,14 @@ const commonConfig = {
       {
         test: /\.jsx?$/,
         loader: 'babel-loader'
+      },
+      {
+        test: /tar[\\/].*\.js$/,
+        loader: ['babel-loader', 'octal-number-loader']
+      },
+      {
+        test: /rc[\\/].*\.js$/,
+        loaders: ['babel-loader', 'shebang-loader']
       }
     ]
   },
