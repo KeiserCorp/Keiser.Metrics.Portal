@@ -1,15 +1,15 @@
 const path = require('path')
-// const HtmlWebpackPlugin = require('html-webpack-plugin')
+const nodeExternals = require('webpack-node-externals')
 
 const commonConfig = {
   target: 'electron-main',
+  externals: [nodeExternals()],
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].js'
   },
   node: {
-    // Not certain if this is needed
-    // __dirname: false
+    __dirname: false
   },
   module: {
     rules: [
@@ -28,7 +28,6 @@ const commonConfig = {
       },
       {
         test: /\.js$/,
-        exclude: /node_modules/,
         enforce: 'pre',
         loader: 'standard-loader',
         options: {
@@ -39,14 +38,6 @@ const commonConfig = {
       {
         test: /\.jsx?$/,
         loader: 'babel-loader'
-      },
-      {
-        test: /tar[\\/].*\.js$/,
-        loader: ['babel-loader', 'octal-number-loader']
-      },
-      {
-        test: /rc[\\/].*\.js$/,
-        loaders: ['babel-loader', 'shebang-loader']
       }
     ]
   },
@@ -62,11 +53,4 @@ module.exports = [
       entry: { main: './src/main.ts' }
     },
     commonConfig)
-  // Object.assign(
-  //   {
-  //     target: 'electron-renderer',
-  //     entry: { gui: './src/gui.ts' },
-  //     plugins: [new HtmlWebpackPlugin()]
-  //   },
-  //   commonConfig)
 ]
