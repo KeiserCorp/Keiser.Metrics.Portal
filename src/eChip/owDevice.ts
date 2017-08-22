@@ -1,10 +1,11 @@
 import * as USB from 'usb'
+import { EventEmitter } from 'events'
 import { OneWireState } from './owState'
 
 export class OneWireDevice {
   private device: USB.Device
   private endpoints: {
-    interrupt: USB.InEndpoint,
+    interrupt: USB.InEndpoint & EventEmitter,
     bulkIn: USB.InEndpoint,
     bulkOut: USB.OutEndpoint
   }
@@ -41,7 +42,7 @@ export class OneWireDevice {
     let inf = this.device.interface(0)
 
     this.endpoints = {
-      interrupt: inf.endpoints.find((endpoint) => endpoint.direction === 'in' && endpoint.transferType === USB.LIBUSB_TRANSFER_TYPE_INTERRUPT) as USB.InEndpoint,
+      interrupt: inf.endpoints.find((endpoint) => endpoint.direction === 'in' && endpoint.transferType === USB.LIBUSB_TRANSFER_TYPE_INTERRUPT) as USB.InEndpoint & EventEmitter,
       bulkIn: inf.endpoints.find((endpoint) => endpoint.direction === 'in' && endpoint.transferType === USB.LIBUSB_TRANSFER_TYPE_BULK) as USB.InEndpoint,
       bulkOut: inf.endpoints.find((endpoint) => endpoint.direction === 'out' && endpoint.transferType === USB.LIBUSB_TRANSFER_TYPE_BULK) as USB.OutEndpoint
     }
@@ -51,12 +52,22 @@ export class OneWireDevice {
     this.device.interface(0).claim()
   }
 
-  private getState(): Promise<OneWireState> {
+  private pollState(): Promise<OneWireState | Error> {
     return new Promise((resolve, reject) => {
-      const callback = (error: any, data: Buffer) => {
-        (error) ? reject(error) : resolve(new OneWireState(data))
-      }
-      this.endpoints.interrupt.transfer(0x20, callback)
+      this.endpoints.interrupt.on('error', (error: Error) => {
+        reject(error)
+      })
+      this.endpoints.interrupt.on('data', (data: Buffer) => {
+        const state = new OneWireState(data)
+        if (state.hasShort) {
+          const callback = () => { reject(new Error('Short Detected')) }
+          this.endpoints.interrupt.stopPoll(callback)
+        } else if (state.keyDetected) {
+          const callback = () => { resolve(state) }
+          this.endpoints.interrupt.stopPoll(callback)
+        }
+      })
+      this.endpoints.interrupt.startPoll(0x01, 0x20)
     })
   }
 
@@ -69,18 +80,9 @@ export class OneWireDevice {
 
   private awaitKey(): void {
     this.reset()
-      .then(() => { return this.getState() })
-      .then((state) => {
-        if (state.hasShort) {
-          throw new Error('Short Detected')
-        }
-        if (state.keyDetected) {
-          this.keyDetected()
-        } else {
-          setTimeout(() => { this.awaitKey() }, 100)
-        }
-      })
-      .catch((error) => {
+      .then(() => this.pollState())
+      .then(() => this.keyDetected())
+      .catch((error: Error) => {
         console.error('Error: ', error)
         this.destroy()
         this.initialize()
