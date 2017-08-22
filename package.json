@@ -1,13 +1,12 @@
 {
   "name": "keiser.metrics.portal",
   "version": "1.0.0",
-  "private": true,
-  "main": "main.js",
+  "author": "Keiser Corp.",
+  "license": "MIT",
   "scripts": {
     "prestart": "webpack --config webpack.config.js",
     "start": "electron ./dist/main.js"
   },
-  "author": "Keiser Corp.",
   "devDependencies": {
     "@types/electron": "^1.6.10",
     "@types/node": "^8.0.24",

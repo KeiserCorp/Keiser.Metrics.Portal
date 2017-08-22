@@ -16,6 +16,7 @@ export class OneWireDevice {
     this.claimInterface()
     this.mapEndpoints()
     this.awaitKey()
+    console.log('Device Opened')
   }
 
   isSameDevice(device: USB.Device): Boolean {
