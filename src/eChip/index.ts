@@ -7,7 +7,7 @@ export class EChip {
     this.ow = new OneWire()
   }
 
-  close() {
+  close(): void {
     this.ow.close()
   }
 }

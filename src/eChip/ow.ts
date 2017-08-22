@@ -19,14 +19,14 @@ export class OneWire {
     }
   }
 
-  close() {
+  close(): void {
     if (this.targetDevice) {
       this.targetDevice.destroy()
       this.targetDevice = null
     }
   }
 
-  private attached(device: USB.Device) {
+  private attached(device: USB.Device): void {
     if (
       device.deviceDescriptor.idVendor === DALLAS_VENDOR_ID &&
       device.deviceDescriptor.idProduct === DALLAS_PRODUCT_ID
@@ -35,17 +35,13 @@ export class OneWire {
     }
   }
 
-  private detached(device: USB.Device) {
+  private detached(device: USB.Device): void {
     if (this.targetDevice && this.targetDevice.isSameDevice(device)) {
       this.close()
     }
   }
 
-  private connect(device: USB.Device) {
+  private connect(device: USB.Device): void {
     this.targetDevice = new OneWireDevice(device)
-    this.targetDevice.reset()
-      .catch((error?: any) => {
-        console.log('oops! - ', error)
-      })
   }
 }
