@@ -11,12 +11,7 @@ export class OneWireDevice {
 
   constructor(device: USB.Device) {
     this.device = device
-    this.device.open()
-
-    this.claimInterface()
-    this.mapEndpoints()
-    this.awaitKey()
-    console.log('Device Opened')
+    this.initialize()
   }
 
   isSameDevice(device: USB.Device): Boolean {
@@ -33,24 +28,13 @@ export class OneWireDevice {
     }
   }
 
-  reset(): Promise<OneWireState> {
-    return new Promise((resolve, reject) => {
-      const callback = (error: any) => { (error) ? reject(error) : resolve() }
-      this.device.controlTransfer(0x40, 0x01, 0x0C4B, 0x0001, new Buffer(0), callback)
-    })
-      .then(() => { return this.getState() })
-      .then((state) => {
-        if (state.hasShort) {
-          throw new Error('Short Detected')
-        }
-        return state
-      })
-  }
+  private initialize(): void {
+    this.device.open()
 
-  awaitKey(): void {
-    this.reset()
-      .then(console.log)
-      .catch(console.error)
+    this.claimInterface()
+    this.mapEndpoints()
+    this.awaitKey()
+    console.log('Device Opened')
   }
 
   private mapEndpoints(): void {
@@ -74,5 +58,36 @@ export class OneWireDevice {
       }
       this.endpoints.interrupt.transfer(0x20, callback)
     })
+  }
+
+  private reset(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const callback = (error: any) => { (error) ? reject(error) : resolve() }
+      this.device.controlTransfer(0x40, 0x01, 0x0C4B, 0x0001, new Buffer(0), callback)
+    })
+  }
+
+  private awaitKey(): void {
+    this.reset()
+      .then(() => { return this.getState() })
+      .then((state) => {
+        if (state.hasShort) {
+          throw new Error('Short Detected')
+        }
+        if (state.keyDetected) {
+          this.keyDetected()
+        } else {
+          setTimeout(() => { this.awaitKey() }, 100)
+        }
+      })
+      .catch((error) => {
+        console.error('Error: ', error)
+        this.destroy()
+        this.initialize()
+      })
+  }
+
+  private keyDetected(): void {
+    console.log('Key Connected')
   }
 }
