@@ -1,8 +1,6 @@
 import * as USB from 'usb'
 import { OneWireDevice } from './owDevice'
-// import { crc81wire } from 'crc'
 
-// const TRANSACTION_TIMEOUT = 10
 const DALLAS_VENDOR_ID = 0x04FA
 const DALLAS_PRODUCT_ID = 0x2490
 
@@ -21,7 +19,7 @@ export class OneWire {
 
   close(): void {
     if (this.targetDevice) {
-      this.targetDevice.destroy()
+      this.targetDevice.disconnect()
       this.targetDevice = null
     }
   }

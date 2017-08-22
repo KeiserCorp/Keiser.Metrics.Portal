@@ -1,6 +1,7 @@
 import * as USB from 'usb'
 import { EventEmitter } from 'events'
 import { OneWireState } from './owState'
+// import { crc81wire } from 'crc'
 
 export class OneWireDevice {
   private device: USB.Device
@@ -20,7 +21,7 @@ export class OneWireDevice {
       device.deviceAddress === this.device.deviceAddress
   }
 
-  destroy() {
+  disconnect() {
     try {
       this.device.close()
       console.log('Device Closed')
@@ -83,9 +84,8 @@ export class OneWireDevice {
       .then(() => this.pollState())
       .then(() => this.keyDetected())
       .catch((error: Error) => {
-        console.error('Error: ', error)
-        this.destroy()
-        this.initialize()
+        console.error('Error: ', error.message)
+        this.device.reset(() => { return })
       })
   }
 
