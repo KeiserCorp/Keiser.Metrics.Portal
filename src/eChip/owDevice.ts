@@ -16,6 +16,10 @@ export class OneWireDevice {
     this.initialize()
   }
 
+  /*****************************************
+	 *	Exposed Controls
+	 *****************************************/
+
   isSameDevice(device: USB.Device): Boolean {
     return device.busNumber === this.device.busNumber &&
       device.deviceAddress === this.device.deviceAddress
@@ -30,14 +34,35 @@ export class OneWireDevice {
     }
   }
 
+  /*****************************************
+   *	Control Flow
+   *****************************************/
+
   private initialize(): void {
     this.device.open()
-
     this.claimInterface()
     this.mapEndpoints()
-    this.awaitKey()
     console.log('Device Opened')
+    this.awaitKey()
   }
+
+  private awaitKey(): void {
+    this.reset()
+      .then(() => this.pollState())
+      .then(() => this.keyDetected())
+      .catch((error: Error) => {
+        console.error('Error: ', error.message)
+        this.device.reset(() => { return })
+      })
+  }
+
+  private keyDetected(): void {
+    console.log('Key Connected')
+  }
+
+  /*****************************************
+   *	Interface and Endpoints
+   *****************************************/
 
   private mapEndpoints(): void {
     let inf = this.device.interface(0)
@@ -51,6 +76,26 @@ export class OneWireDevice {
 
   private claimInterface(): void {
     this.device.interface(0).claim()
+  }
+
+  /*****************************************
+   *	1-Wire Commands
+   *****************************************/
+
+  private reset(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const callback = (error: any) => { (error) ? reject(error) : resolve() }
+      this.device.controlTransfer(0x40, 0x01, 0x0C4B, 0x0001, new Buffer(0), callback)
+    })
+  }
+
+  private setSpeed(overdrive: Boolean = false): Promise<void> {
+    const index = overdrive ? 0x0002 : 0x0001
+
+    return new Promise((resolve, reject) => {
+      const callback = (error: any) => { (error) ? reject(error) : resolve() }
+      this.device.controlTransfer(0x40, 0x02, 0x0002, index, new Buffer(0), callback)
+    })
   }
 
   private pollState(): Promise<OneWireState | Error> {
@@ -70,26 +115,5 @@ export class OneWireDevice {
       })
       this.endpoints.interrupt.startPoll(0x01, 0x20)
     })
-  }
-
-  private reset(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const callback = (error: any) => { (error) ? reject(error) : resolve() }
-      this.device.controlTransfer(0x40, 0x01, 0x0C4B, 0x0001, new Buffer(0), callback)
-    })
-  }
-
-  private awaitKey(): void {
-    this.reset()
-      .then(() => this.pollState())
-      .then(() => this.keyDetected())
-      .catch((error: Error) => {
-        console.error('Error: ', error.message)
-        this.device.reset(() => { return })
-      })
-  }
-
-  private keyDetected(): void {
-    console.log('Key Connected')
   }
 }
