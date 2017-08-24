@@ -89,14 +89,14 @@ export class OneWireDevice {
     })
   }
 
-  private setSpeed(overdrive: Boolean = false): Promise<void> {
-    const index = overdrive ? 0x0002 : 0x0001
+  // private setSpeed(overdrive: Boolean = false): Promise<void> {
+  //   const index = overdrive ? 0x0002 : 0x0001
 
-    return new Promise((resolve, reject) => {
-      const callback = (error: any) => { (error) ? reject(error) : resolve() }
-      this.device.controlTransfer(0x40, 0x02, 0x0002, index, new Buffer(0), callback)
-    })
-  }
+  //   return new Promise((resolve, reject) => {
+  //     const callback = (error: any) => { (error) ? reject(error) : resolve() }
+  //     this.device.controlTransfer(0x40, 0x02, 0x0002, index, new Buffer(0), callback)
+  //   })
+  // }
 
   private pollState(): Promise<OneWireState | Error> {
     return new Promise((resolve, reject) => {
