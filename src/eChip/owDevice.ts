@@ -100,19 +100,20 @@ export class OneWireDevice {
 
   private pollState(): Promise<OneWireState | Error> {
     return new Promise((resolve, reject) => {
-      this.endpoints.interrupt.on('error', (error: Error) => {
+      this.endpoints.interrupt.once('error', (error: Error) => {
         reject(error)
       })
-      this.endpoints.interrupt.on('data', (data: Buffer) => {
+      const dataCallback = (data: Buffer) => {
         const state = new OneWireState(data)
         if (state.hasShort) {
-          const callback = () => { reject(new Error('Short Detected')) }
-          this.endpoints.interrupt.stopPoll(callback)
+          this.endpoints.interrupt.stopPoll(() => { reject(new Error('Short Detected')) })
+          this.endpoints.interrupt.removeListener('data', dataCallback)
         } else if (state.keyDetected) {
-          const callback = () => { resolve(state) }
-          this.endpoints.interrupt.stopPoll(callback)
+          this.endpoints.interrupt.stopPoll(() => { resolve(state) })
+          this.endpoints.interrupt.removeListener('data', dataCallback)
         }
-      })
+      }
+      this.endpoints.interrupt.on('data', dataCallback)
       this.endpoints.interrupt.startPoll(0x01, 0x20)
     })
   }
