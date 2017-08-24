@@ -4,8 +4,8 @@ import { OneWireState } from './owState'
 // import { crc81wire } from 'crc'
 
 export class OneWireDevice {
-  private device: USB.Device
-  private endpoints: {
+  protected device: USB.Device
+  protected endpoints: {
     interrupt: USB.InEndpoint & EventEmitter,
     bulkIn: USB.InEndpoint,
     bulkOut: USB.OutEndpoint
@@ -38,7 +38,7 @@ export class OneWireDevice {
    *	Control Flow
    *****************************************/
 
-  private initialize(): void {
+  protected initialize(): void {
     this.device.open()
     this.claimInterface()
     this.mapEndpoints()
@@ -46,7 +46,7 @@ export class OneWireDevice {
     this.awaitKey()
   }
 
-  private awaitKey(): void {
+  protected awaitKey(): void {
     this.reset()
       .then(() => this.pollState())
       .then(() => this.keyDetected())
@@ -56,7 +56,7 @@ export class OneWireDevice {
       })
   }
 
-  private keyDetected(): void {
+  protected keyDetected(): void {
     console.log('Key Connected')
   }
 
@@ -64,7 +64,7 @@ export class OneWireDevice {
    *	Interface and Endpoints
    *****************************************/
 
-  private mapEndpoints(): void {
+  protected mapEndpoints(): void {
     let inf = this.device.interface(0)
 
     this.endpoints = {
@@ -74,7 +74,7 @@ export class OneWireDevice {
     }
   }
 
-  private claimInterface(): void {
+  protected claimInterface(): void {
     this.device.interface(0).claim()
   }
 
@@ -82,23 +82,23 @@ export class OneWireDevice {
    *	1-Wire Commands
    *****************************************/
 
-  private reset(): Promise<void> {
+  protected reset(): Promise<void> {
     return new Promise((resolve, reject) => {
       const callback = (error: any) => { (error) ? reject(error) : resolve() }
       this.device.controlTransfer(0x40, 0x01, 0x0C4B, 0x0001, new Buffer(0), callback)
     })
   }
 
-  // private setSpeed(overdrive: Boolean = false): Promise<void> {
-  //   const index = overdrive ? 0x0002 : 0x0001
+  protected setSpeed(overdrive: Boolean = false): Promise<void> {
+    const index = overdrive ? 0x0002 : 0x0001
 
-  //   return new Promise((resolve, reject) => {
-  //     const callback = (error: any) => { (error) ? reject(error) : resolve() }
-  //     this.device.controlTransfer(0x40, 0x02, 0x0002, index, new Buffer(0), callback)
-  //   })
-  // }
+    return new Promise((resolve, reject) => {
+      const callback = (error: any) => { (error) ? reject(error) : resolve() }
+      this.device.controlTransfer(0x40, 0x02, 0x0002, index, new Buffer(0), callback)
+    })
+  }
 
-  private pollState(): Promise<OneWireState | Error> {
+  protected pollState(): Promise<OneWireState | Error> {
     return new Promise((resolve, reject) => {
       this.endpoints.interrupt.once('error', (error: Error) => {
         reject(error)
