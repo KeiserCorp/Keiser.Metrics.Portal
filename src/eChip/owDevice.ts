@@ -98,6 +98,27 @@ export class OneWireDevice {
     })
   }
 
+  protected read(length: number): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      const callback = (error: any, data: Buffer) => { (error) ? reject(error) : resolve(data) }
+      this.endpoints.bulkIn.transfer(length, callback)
+    })
+  }
+
+  protected readBit(): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      const callback = (error: any) => { (error) ? reject(error) : resolve() }
+      this.device.controlTransfer(0x40, 0x01, 0x29, 0x00, new Buffer(0), callback)
+    })
+      .then(() => {
+        return this.read(1)
+      })
+  }
+
+  protected clearByte(): Promise<Buffer> {
+    return this.read(1)
+  }
+
   protected pollState(): Promise<OneWireState | Error> {
     return new Promise((resolve, reject) => {
       this.endpoints.interrupt.once('error', (error: Error) => {
