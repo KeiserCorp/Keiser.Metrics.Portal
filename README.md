@@ -15,4 +15,6 @@ $ npm start
 ```
 
 ## Copyright and License
-Copyright [Keiser Corporation](http://keiser.com/) under the [MIT license](LICENSE.md).
+Copyright 2017 [Keiser Corporation](http://keiser.com/).
+
+Licensed under the [MIT license](LICENSE.md).
