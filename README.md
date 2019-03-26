@@ -1,5 +1,5 @@
 # Keiser Metrics Portal
-
+⛔️ [DEPRECATED] This repository is no longer maintained.
 ## Server Requirements
 
 - Node.js (>= 7.2.1)
